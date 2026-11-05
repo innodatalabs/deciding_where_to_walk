@@ -1,0 +1,22 @@
+benchmark,model,maker,slug,version,kind,questions,metric,score,score_95,exactly_correct,usd_per_1000,hit_step_limit
+metaqa,d1-ultra,Liquid AI,liquid/d1-ultra,liquid/d1-ultra-20261015,decision model,1500,Hits@1,0.968738,0.0079844,0.948667,0.0450239,0
+metaqa,Mercury Decide,Inception,inception/mercury-decide,inception/mercury-decide-20260930,decision model,1500,Hits@1,0.921399,0.0130233,0.904,0.0228359,0.000666667
+metaqa,GPT-6 Luna Decisions,OpenAI,openai/gpt-6-luna-decisions,openai/gpt-6-luna-decisions-20261006,decision model,1500,Hits@1,0.839309,0.0180206,0.814667,0.177495,0.0666667
+metaqa,Jev 1.13,Typesafe,typesafe/jev-1.13,typesafe/jev-1.13-20260917,decision model,1500,Hits@1,0.898228,0.0147547,0.88,0.0857018,0.00533333
+metaqa,Jev 1.14,Typesafe,typesafe/jev-1.14,typesafe/jev-1.14-20261014,decision model,1500,Hits@1,0.909535,0.0140031,0.890667,0.0807348,0.00866667
+metaqa,Decision-1,Microsoft,microsoft/microsoft-decision-1,microsoft/microsoft-decision-1-20261009,decision model,1500,Hits@1,0.907159,0.0139349,0.870667,0.0381895,0.000666667
+metaqa,GPT-5.6 Luna,OpenAI,openai/gpt-5.6-luna,openai/gpt-5.6-luna,LLM,1500,Hits@1,0.891228,0.0153186,0.876,0.269796,0.0446667
+webqsp,d1-ultra,Liquid AI,liquid/d1-ultra,liquid/d1-ultra-20261015,decision model,1639,F1,0.698968,0.0201975,0.599756,0.229041,0.0793167
+webqsp,Mercury Decide,Inception,inception/mercury-decide,inception/mercury-decide-20260930,decision model,1639,F1,0.704776,0.0202207,0.605857,0.135389,0.114094
+webqsp,GPT-6 Luna Decisions,OpenAI,openai/gpt-6-luna-decisions,openai/gpt-6-luna-decisions-20261006,decision model,1633,F1,0.650614,0.0215838,0.560318,0.590176,0.204532
+webqsp,Jev 1.13,Typesafe,typesafe/jev-1.13,typesafe/jev-1.13-20260917,decision model,1639,F1,0.683639,0.0205266,0.579622,0.317639,0.110433
+webqsp,Jev 1.14,Typesafe,typesafe/jev-1.14,typesafe/jev-1.14-20261014,decision model,1639,F1,0.677923,0.0207446,0.578401,0.31854,0.115924
+webqsp,Decision-1,Microsoft,microsoft/microsoft-decision-1,microsoft/microsoft-decision-1-20261009,decision model,1639,F1,0.665605,0.0211342,0.57169,0.237246,0.121415
+webqsp,GPT-5.6 Luna,OpenAI,openai/gpt-5.6-luna,openai/gpt-5.6-luna,LLM,1639,F1,0.695583,0.020536,0.596095,1.36381,0.134838
+cwq,d1-ultra,Liquid AI,liquid/d1-ultra,liquid/d1-ultra-20261015,decision model,3519,P@1,0.38358,0.0144893,0.306905,0.301655,0.249503
+cwq,Mercury Decide,Inception,inception/mercury-decide,inception/mercury-decide-20260930,decision model,3519,P@1,0.394737,0.0145383,0.316283,0.175189,0.277636
+cwq,GPT-6 Luna Decisions,OpenAI,openai/gpt-6-luna-decisions,openai/gpt-6-luna-decisions-20261006,decision model,3503,P@1,0.354602,0.0146002,0.294605,0.765959,0.37054
+cwq,Jev 1.13,Typesafe,typesafe/jev-1.13,typesafe/jev-1.13-20260917,decision model,3519,P@1,0.36705,0.0141333,0.284456,0.396871,0.208298
+cwq,Jev 1.14,Typesafe,typesafe/jev-1.14,typesafe/jev-1.14-20261014,decision model,3519,P@1,0.36085,0.0141376,0.281046,0.40296,0.256039
+cwq,Decision-1,Microsoft,microsoft/microsoft-decision-1,microsoft/microsoft-decision-1-20261009,decision model,3519,P@1,0.364565,0.0141941,0.28474,0.307278,0.255754
+cwq,GPT-5.6 Luna,OpenAI,openai/gpt-5.6-luna,openai/gpt-5.6-luna,LLM,3519,P@1,0.370929,0.0145949,0.303211,1.84549,0.358056
