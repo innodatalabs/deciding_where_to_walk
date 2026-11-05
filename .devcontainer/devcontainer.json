@@ -1,0 +1,25 @@
+{
+  "name": "Deciding where to walk: decision models on knowledge graphs",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "runServices": ["workspace", "neo4j"],
+  "workspaceFolder": "/workspaces/deciding-where-to-walk",
+  "shutdownAction": "stopCompose",
+  "features": {
+    "ghcr.io/va-h/devcontainers-features/uv:1": {}
+  },
+  "postCreateCommand": "uv sync && uv run python -m ipykernel install --user --name deciding-where-to-walk --display-name 'Deciding where to walk (uv)'",
+  "forwardPorts": [7474, 7687],
+  "portsAttributes": {
+    "7474": { "label": "Neo4j Browser" },
+    "7687": { "label": "Neo4j Bolt" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "ms-toolsai.jupyter"],
+      "settings": {
+        "python.defaultInterpreterPath": "/workspaces/deciding-where-to-walk/.venv/bin/python"
+      }
+    }
+  }
+}
