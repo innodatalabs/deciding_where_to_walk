@@ -1,0 +1,8 @@
+.env
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+benchmark/runs/
+data/downloads/
+data/.hf_cache/
+data/loaded/

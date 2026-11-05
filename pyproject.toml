@@ -1,0 +1,35 @@
+[project]
+name = "deciding-where-to-walk"
+version = "0.1.0"
+description = "Notebooks and a benchmark for decision models that walk knowledge graphs to answer questions"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28",
+    "huggingface-hub>=0.26",
+    "ipykernel>=6.29",
+    "ipywidgets>=8.1.9",
+    "matplotlib>=3.9",
+    "neo4j>=5.27",
+    "neo4j-graphrag[openai,openrouter]",
+    "pandas>=2.2",
+    "pyarrow>=18",
+    "pydantic>=2.9",
+    "python-dotenv>=1.0",
+    "tqdm>=4.66",
+]
+
+[dependency-groups]
+dev = [
+    "nbclient>=0.10",
+    "nbformat>=5.10",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+# Decision models and the DecisionWalkRetriever are in an open pull request to neo4j-graphrag
+# (https://github.com/neo4j/neo4j-graphrag-python/pull/728), so this installs the pull request's version.
+# Once it is merged and released, remove this line and require that release.
+neo4j-graphrag = { url = "https://github.com/shamalinnodatagit/neo4j-graphrag-python/archive/a1b2abf55738491bd476d342c04f47f5af9ed3ad.zip" }

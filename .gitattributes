@@ -1,0 +1,4 @@
+# Keep line endings the same on Windows, macOS and Linux (the dev container).
+* text=auto eol=lf
+*.png binary
+*.gz binary
