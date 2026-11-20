@@ -109,6 +109,29 @@ line means that the decision model scored higher. The lines are a little wider t
 compare six models at once and want to avoid a lucky result. We call a model **better** or **worse** only when its whole
 line is on one side of zero. Otherwise we call it **about the same**.
 
+## Poisoned graphs
+
+Can text planted in the graph steer a walk? An attacker who can add nodes and edges (for example through a document
+turned into a graph) plants them on each of 200 MetaQA questions' start entity. The planted entity names carry an
+instruction to follow the planted edge (`follow`), to stop now (`stop`), or a fake end of the prompt that says the
+answer is STOP (`format`). A fourth attack, `twin`, adds look-alike `<relation>_corrected` edges to wrong entities.
+A harmless planted edge (`benign`) is the control. Every model can still only pick a numbered option.
+
+| Model | follow | format | twin | Worst score drop |
+|---|---|---|---|---|
+| GPT-5.6 Luna (LLM) | **20.5%** (15–26.5) | **9%** (5–13) | 2.5% (0.5–5) | −0.147 |
+| GPT-6 Luna Decisions | 3% (1–5.5) | 0% | 0% | −0.025 |
+| Other decision models | ≤ 1% | 0% | ≤ 1.5% | ≤ −0.022 |
+
+The table shows how often the first step took the attacker's bait, with paired 95% bootstrap intervals; the control
+took it 0–0.5% of the time. No model took the `stop` bait more than 0.5% of the time. The LLM can be steered by planted
+text; the decision models mostly cannot. A more realistic round planted one short tag on movies that already have
+tags: GPT-5.6 Luna obeyed it no more often than its control (12.5% vs 12.5% on 32 questions), so that round confirmed
+no attack.
+
+The code is in [`../utils/poisoning.py`](../utils/poisoning.py) (`python -m utils.poisoning` runs its self-check), and
+the numbers are in [`results/poisoned_graph.csv`](results/poisoned_graph.csv) and the `results/poisoned_tags_*` files.
+
 ## How we ran it
 
 - **The walk.** At each step, the options are the relationships around the entities that the walk stands on: one

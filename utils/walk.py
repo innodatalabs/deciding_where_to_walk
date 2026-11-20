@@ -26,8 +26,11 @@ MAX_OPTIONS = 255  # the decision models' limit per request; a step with more op
 
 def build_request(state: dict, options: list[dict]) -> dict:
     """The request that every model receives: the state, the instructions and the numbered options."""
+    state = dict(state)
+    extra = state.pop("instructions_extra", "")
+    instructions = f"{INSTRUCTIONS} {extra}" if extra else INSTRUCTIONS
     return {"state": state,
-            "questions": {"next_step": {"type": "choice", "instructions": INSTRUCTIONS,
+            "questions": {"next_step": {"type": "choice", "instructions": instructions,
                                         "criteria": {str(i): o["text"] for i, o in enumerate(options)}}}}
 
 
@@ -83,6 +86,8 @@ async def walk(benchmark: str, question: dict, model, http, driver, max_steps: i
             stopped_by = "nothing_to_follow"
             break
         state = {"question": question["question"], "current_entities": current, "path_so_far": path, "hop": hop}
+        if extra := question.get("instructions_extra"):
+            state["instructions_extra"] = extra
         offer_stop = not (BENCHMARKS[benchmark].no_stop_on_unnamed and all_unnamed(current))
         if not offer_stop and len(options) == 2:  # without STOP, one connection is left: follow it
             chosen, calls = 1, []
