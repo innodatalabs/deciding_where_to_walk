@@ -20,3 +20,9 @@ cwq,Jev 1.13,Typesafe,typesafe/jev-1.13,typesafe/jev-1.13-20260917,decision mode
 cwq,Jev 1.14,Typesafe,typesafe/jev-1.14,typesafe/jev-1.14-20261014,decision model,3519,P@1,0.36085,0.0141376,0.281046,0.40296,0.256039
 cwq,Decision-1,Microsoft,microsoft/microsoft-decision-1,microsoft/microsoft-decision-1-20261009,decision model,3519,P@1,0.364565,0.0141941,0.28474,0.307278,0.255754
 cwq,GPT-5.6 Luna,OpenAI,openai/gpt-5.6-luna,openai/gpt-5.6-luna,LLM,3519,P@1,0.370929,0.0145949,0.303211,1.84549,0.358056
+biohopr,d1-ultra,Liquid AI,liquid/d1-ultra,liquid/d1-ultra-20261015,decision model,2000,Precision,0.993101,0.00344826,0.992,0.0689285,0.006
+biohopr,GPT-6 Luna Decisions,OpenAI,openai/gpt-6-luna-decisions,openai/gpt-6-luna-decisions-20261006,decision model,2000,Precision,0.868748,0.0146126,0.8645,0.190218,0.119
+biohopr,Jev 1.13,Typesafe,typesafe/jev-1.13,typesafe/jev-1.13-20260917,decision model,2000,Precision,0.921806,0.0115289,0.916,0.108415,0.042
+biohopr,Jev 1.14,Typesafe,typesafe/jev-1.14,typesafe/jev-1.14-20261014,decision model,2000,Precision,0.940531,0.0101681,0.936,0.107705,0.026
+biohopr,Decision-1,Microsoft,microsoft/microsoft-decision-1,microsoft/microsoft-decision-1-20261009,decision model,2000,Precision,0.958051,0.00869718,0.957,0.0659871,0.0225
+biohopr,GPT-5.6 Luna,OpenAI,openai/gpt-5.6-luna,openai/gpt-5.6-luna,LLM,2000,Precision,0.922315,0.0116096,0.9205,0.397919,0.072

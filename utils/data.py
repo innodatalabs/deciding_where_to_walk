@@ -1,4 +1,4 @@
-"""The three benchmarks: where they come from, how to read them, and the small samples that ship with the repository.
+"""The four benchmarks: where they come from, how to read them, and the small samples that ship with the repository.
 
 Every question is a plain dict:
 
@@ -7,7 +7,8 @@ Every question is a plain dict:
 
 WebQSP and CWQ questions also carry "graph", the list of [head, relation, tail] triples of the question's own subgraph
 (from the RoG release on Hugging Face), and "gold", the gold answers from the benchmark's official file, which the
-scoring uses. MetaQA questions carry "hops", and all of them share one film knowledge base.
+scoring uses. MetaQA questions carry "hops", and all of them share one film knowledge base. BioHopR questions carry
+"hops" and "official" (BioHopR's own answer list), and all of them share PrimeKG; see biohopr.py.
 """
 from __future__ import annotations
 
@@ -33,6 +34,8 @@ class Benchmark:
     # Freebase has unnamed records (shown by their ID, e.g. m.0j4jq57) that link other entities together. While the
     # walk stands only on such records, STOP is not offered, so the walk moves on to the named entities behind them.
     no_stop_on_unnamed: bool = False
+    # PrimeKG's edges have no direction, so each relation is one option, whichever way it was stored.
+    undirected: bool = False
 
 
 BENCHMARKS = {
@@ -42,6 +45,8 @@ BENCHMARKS = {
                         max_steps=3, metric="F1", split="test", no_stop_on_unnamed=True),
     "cwq": Benchmark("cwq", "ComplexWebQuestions", "rmanluo/RoG-cwq", "b0f6275586286312c4e99ef4b0adc65463c91f8e",
                      max_steps=4, metric="P@1", split="validation", no_stop_on_unnamed=True),
+    "biohopr": Benchmark("biohopr", "BioHopR", "knowlab-research/BioHopR", "08f06692c3900347e7405ba55ff6a6d330f55ddb",
+                         max_steps=3, metric="Precision", split="train", undirected=True),
 }
 
 SAMPLE_SIZE = 200  # questions per benchmark in data/samples/
@@ -60,6 +65,10 @@ def download(benchmark: str) -> Path:
     """Download a benchmark from Hugging Face into data/downloads/<benchmark>/ (skipped if already there)."""
     from huggingface_hub import snapshot_download
 
+    if benchmark == "biohopr":
+        from . import biohopr
+
+        return biohopr.download()
     b = BENCHMARKS[benchmark]
     patterns = (["kb/kb.txt", "*-hop/vanilla/qa_test.txt"] if benchmark == "metaqa" else [f"data/{b.split}-*.parquet"])
     folder = DOWNLOADS / benchmark
@@ -86,6 +95,10 @@ def read_full(benchmark: str, folder: Path | None = None, official: Path | None 
     folder = folder or download(benchmark)
     if benchmark == "metaqa":
         return _read_metaqa_questions(folder)
+    if benchmark == "biohopr":
+        from . import biohopr
+
+        return biohopr.questions(folder)
     import pandas as pd
 
     official = official or folder / "official" / OFFICIAL[benchmark][1]
@@ -137,12 +150,17 @@ def _read_metaqa_questions(folder: Path) -> list[dict]:
 # ---------------------------------------------------------------- the samples that ship with the repository
 def make_samples(folders: dict[str, Path], officials: dict[str, Path], size: int = SAMPLE_SIZE, seed: int = 0) -> None:
     """Maintainers only: write data/samples/ from downloaded benchmarks. The order is shuffled once, with a fixed seed,
-    so "the first 50 questions" are the same 50 for everyone. MetaQA takes the same number of questions per hop."""
+    so "the first 50 questions" are the same 50 for everyone. MetaQA and BioHopR take the same number of questions per
+    hop."""
     SAMPLES.mkdir(parents=True, exist_ok=True)
     for benchmark, folder in folders.items():
         questions = read_full(benchmark, folder, officials.get(benchmark))
         rng = random.Random(seed)
-        if benchmark == "metaqa":
+        if benchmark == "biohopr":
+            from . import biohopr
+
+            sample = biohopr.stratified(questions, size // 2, seed)
+        elif benchmark == "metaqa":
             by_hop = [[q for q in questions if q["hops"] == h] for h in (1, 2, 3)]
             picked = [rng.sample(group, size // 3 + (h < size % 3)) for h, group in enumerate(by_hop)]
             sample = [q for trio in zip(*picked) for q in trio]  # interleaved: 1-hop, 2-hop, 3-hop, 1-hop, ...
@@ -168,6 +186,7 @@ def questions_for(benchmark: str, size: int | None = 50, source: str = "sample",
 
     source="sample": the first `size` questions of the sample in data/samples/ (at most 200), no download needed.
     source="huggingface": the full benchmark, downloaded; `size` questions picked at random with `seed`, or all of them.
+    For BioHopR, half of them are one-step questions and half two-step.
     """
     if benchmark not in BENCHMARKS:
         raise ValueError(f"Unknown benchmark {benchmark!r}. Choose one of {list(BENCHMARKS)}.")
@@ -178,5 +197,9 @@ def questions_for(benchmark: str, size: int | None = 50, source: str = "sample",
         return sample[:size] if size else sample
     if source == "huggingface":
         questions = read_full(benchmark)
+        if size is not None and benchmark == "biohopr":
+            from . import biohopr
+
+            return biohopr.stratified(questions, size // 2, seed)
         return questions if size is None else random.Random(seed).sample(questions, size)
     raise ValueError("source must be 'sample' or 'huggingface'")

@@ -9,6 +9,9 @@ share of the set that is a gold answer.
                   the question, keeping the best parse
   CWQ     P@1     the official eval_script.py: an answer counts if it matches a gold answer or one of its aliases;
                   the score is the share of the answer set that matches (also "reached": whether any of it matches)
+  BioHopR Precision  share of the answer set that is a right answer, where the right answers are everything the
+                  question's relations reach in PrimeKG (also recall, F1, and precision and exact match against
+                  BioHopR's own answer list); see biohopr.py
 
 "Exactly correct" means the answer is fully right: the exact gold set, an F1 of 1, or a P@1 of 1.
 """
@@ -25,6 +28,8 @@ def score(benchmark: str, question: dict, final: list[str] | None) -> dict:
         return _metaqa(final, question)
     if benchmark == "webqsp":
         return _webqsp(final, question)
+    if benchmark == "biohopr":
+        return _biohopr(final, question)
     return _cwq(final, question)
 
 
@@ -36,6 +41,18 @@ def _metaqa(final: list[str], question: dict) -> dict:
     recall = hits / len(gold)
     f1 = 2 * precision * recall / (precision + recall) if hits else 0.0
     return {"score": precision, "exact": answer == gold, "f1": f1}
+
+
+# ---------------------------------------------------------------- BioHopR
+def _biohopr(final: list[str], question: dict) -> dict:
+    answer, gold, official = set(final), set(question["answers"]), set(question["official"])
+    hits = len(answer & gold)
+    precision = hits / len(answer) if answer else 0.0
+    recall = hits / len(gold)
+    return {"score": precision, "exact": answer == gold, "recall": recall,
+            "f1": 2 * precision * recall / (precision + recall) if hits else 0.0,
+            "precision_official": len(answer & official) / len(answer) if answer else 0.0,
+            "exact_official": answer == official}
 
 
 # ---------------------------------------------------------------- WebQSP (official eval.py)
