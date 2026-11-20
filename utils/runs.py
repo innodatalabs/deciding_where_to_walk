@@ -66,8 +66,13 @@ def open_run(benchmark: str, questions: list[dict], name: str | None = None) -> 
     return run
 
 
+def folder_name(label: str) -> str:
+    """A model's label as a folder name, for example "liquid/d1-ultra" -> "liquid__d1-ultra"."""
+    return re.sub(r"[^\w.\-]+", "__", label).strip("_")
+
+
 def model_folder(run: Run, model) -> Path:
-    return run.folder / re.sub(r"[^\w.\-]+", "__", model.label).strip("_")
+    return run.folder / folder_name(model.label)
 
 
 def done_questions(folder: Path) -> set[str]:
@@ -141,5 +146,5 @@ def load_results(benchmark: str | None = None, runs: list[str] | None = None, ro
 
 def load_decisions(run: str, benchmark: str, model_label: str, root: Path = RUNS) -> dict[str, list[dict]]:
     """The decision log of one model in one run, by question."""
-    folder = root / run / benchmark / re.sub(r"[^\w.\-]+", "__", model_label).strip("_")
+    folder = root / run / benchmark / folder_name(model_label)
     return {r["qid"]: r["decisions"] for r in map(json.loads, (folder / "decisions.jsonl").read_text().splitlines())}

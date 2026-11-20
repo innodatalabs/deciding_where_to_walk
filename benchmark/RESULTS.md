@@ -18,6 +18,10 @@ notebooks in this folder run the same benchmark, so you can check our numbers or
   **Decision-1** (Microsoft) was about as accurate on MetaQA and ComplexWebQuestions, and less accurate on WebQSP.
 - **GPT-6 Luna Decisions** (OpenAI) was less accurate than GPT-5.6 Luna on all three benchmarks. It was also the most
   expensive of the six decision models.
+- **One more decision helps d1-ultra.** After the walk, d1-ultra picks the entity that best answers the question, and
+  if it is at least 90% sure, that entity alone becomes the answer. On 1,000 WebQSP and 1,000 CWQ questions that were
+  not used to choose the 90%, this raised the share of exactly correct answers by 2.7 and 5.4 points, for about a cent
+  per 1,000 questions. See [Picking the answer](#picking-the-answer).
 
 ## What we measured
 
@@ -109,6 +113,52 @@ line means that the decision model scored higher. The lines are a little wider t
 compare six models at once and want to avoid a lucky result. We call a model **better** or **worse** only when its whole
 line is on one side of zero. Otherwise we call it **about the same**.
 
+## Picking the answer
+
+A walk follows a relationship to all of its entities, so it often ends on several entities when only some of them
+answer the question. So we tried one more decision after the walk: d1-ultra gets the question, the path it walked and
+the entities it ended on, and chooses the entity that best answers the question. If it gives that entity a probability
+of at least 0.9, the answer becomes that entity alone. Otherwise the walk's answer stays as it was. That is one more
+call for each walk that ended on two or more entities, which costs about a cent per 1,000 questions: 3 to 4% on top of
+the walk.
+
+We chose the 0.9 on d1-ultra's walks of the WebQSP test questions. Then we tested it, unchanged, on questions it had not
+seen: 1,000 random questions from WebQSP's training set, and 1,000 random CWQ development questions (leaving out the 200
+that come with this repository). d1-ultra walked each set once, and the pick ran on those walks.
+
+![What the pick added on 1,000 WebQSP and 1,000 CWQ questions, next to what cutting the same answers at random would add](results/picking_the_answer.png)
+
+Each blue bar is what the pick added to the walk's answers, averaged over the 1,000 questions, in points (hundredths
+of the score, or percentage points of exactly correct answers). Its thin line shows the 95% interval. Each gray bar is
+what cutting the same answers to one entity at random would have added instead. Cutting an answer always changes its
+score, so the pick only counts as a real gain if it also beats cutting at random. It does, on both benchmarks.
+
+| | WebQSP (F1) | CWQ (P@1) |
+|-|-|-|
+| Walks the pick was asked about | 617 of 1,000 | 524 of 1,000 |
+| Answers it cut to one entity | 61 | 72 |
+| Score: the walk, then after the pick | 0.71, then 0.73 | 0.39, then 0.42 |
+| Exactly correct: the walk, then after the pick | 61%, then 63% | 31%, then 36% |
+| Gain in score (95% interval) | +0.016 (+0.009 to +0.024) | +0.036 (+0.026 to +0.046) |
+| Gain in exactly correct (95% interval) | +2.7 points (+1.3 to +4.1) | +5.4 points (+4.0 to +6.8) |
+| Gain in score over cutting at random (95% interval) | +0.026 (+0.018 to +0.034) | +0.036 (+0.026 to +0.046) |
+| Questions it helped, and hurt | 3.9%, and 1.2% | 5.4%, and 0.2% |
+| $ per 1,000 questions for the pick | $0.010 | $0.009 |
+
+Some things to keep in mind:
+
+- **It only acts when d1-ultra is very sure**: on 1 in 10 of the answers it was asked about on WebQSP, and 1 in 7 on
+  CWQ. So it closes only part of the gap to a perfect pick (one that keeps exactly the right entities): about a fifth
+  on WebQSP and a sixth on CWQ.
+- **CWQ gains more partly because of how it is scored.** P@1 gives full marks for any one right answer, so keeping one
+  right entity loses nothing. WebQSP's F1 drops when a question has several right answers and only one is kept, so
+  there the pick can hurt even when it keeps a right answer.
+- **The same on a second try.** d1-ultra answers slightly differently from run to run, so we asked it twice on each set
+  of walks. The gains moved by at most 0.4 points.
+- **A choice can have at most 255 options**, so a walk that ends on more entities is not asked, and keeps its answer.
+  That happened once in the 2,000 questions.
+- **We tested only d1-ultra**, and not on MetaQA.
+
 ## How we ran it
 
 - **The walk.** At each step, the options are the relationships around the entities that the walk stands on: one
@@ -137,7 +187,8 @@ line is on one side of zero. Otherwise we call it **about the same**.
 | GPT-5.6 Luna (LLM) | OpenAI | `openai/gpt-5.6-luna` | `openai/gpt-5.6-luna` |
 
 The numbers behind this page are in [`results/summary.csv`](results/summary.csv) and
-[`results/paired.csv`](results/paired.csv).
+[`results/paired.csv`](results/paired.csv), and those for picking the answer are in
+[`results/picking_the_answer.csv`](results/picking_the_answer.csv).
 
 ## Run it yourself
 
@@ -146,6 +197,9 @@ The three notebooks in this folder run the same benchmark with any model on Open
 1. [`1_load_benchmark.ipynb`](1_load_benchmark.ipynb) loads the questions and their graphs into Neo4j.
 2. [`2_run_benchmark.ipynb`](2_run_benchmark.ipynb) runs decision models and LLMs on them.
 3. [`3_compare_results.ipynb`](3_compare_results.ipynb) compares your runs.
+
+A fourth notebook, [`4_self_aware_walk.ipynb`](4_self_aware_walk.ipynb), tests walks that use a decision model's
+probabilities on one of your runs. It runs the pick described above and draws its chart for that run.
 
 The repository comes with 200 questions of each benchmark, so a run takes minutes and costs cents. With 200 questions
 the scores are less precise than the ones on this page (their range is about ±0.02 on MetaQA and ±0.06 on WebQSP and
