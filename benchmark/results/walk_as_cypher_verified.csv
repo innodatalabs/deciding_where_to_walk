@@ -1,0 +1,4 @@
+benchmark,walks,same_answer,start_not_in_graph,query_errors,query_ms_median,query_ms_p95,walk_ms_median,runs,other_differences
+cwq,1400,1399,1,0,4.61,19.35,2673.0,cwq-001 run-001 run-002,0
+metaqa,400,400,0,0,1.65,4.9,1831.5,run-001 run-002,0
+webqsp,4678,4652,26,0,2.01,9.16,1948.0,full-001 full-002 run-001 run-002 train-001,0
