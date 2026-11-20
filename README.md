@@ -7,10 +7,12 @@ is built for that kind of choice: you give it numbered options, and it returns a
 write any text.
 
 This repository shows how a decision model walks a knowledge graph, and how well it does on three well-known
-question-answering benchmarks. It also shows how to use a decision model in Neo4j's GraphRAG library.
+question-answering benchmarks and on biomedical questions over PrimeKG (BioHopR). It also shows how to use a decision
+model in Neo4j's GraphRAG library.
 
 **The result in one sentence:** the best decision models answered as accurately as an LLM (GPT-5.6 Luna), or more
-accurately, and the LLM cost 6 to 12 times as much. The details are in [benchmark/RESULTS.md](benchmark/RESULTS.md).
+accurately, and the LLM cost 6 to 12 times as much; on the biomedical questions, d1-ultra answered 99% exactly right
+and GPT-5.6 Luna 92%. The details are in [benchmark/RESULTS.md](benchmark/RESULTS.md).
 
 ![Score against cost for six decision models and GPT-5.6 Luna on three benchmarks](benchmark/results/score_against_cost.png)
 
@@ -71,3 +73,8 @@ benchmark notebooks can download the full sets.
 - The Freebase graph of each WebQSP and CWQ question comes from the RoG release (Luo et al., 2024):
   [rmanluo/RoG-webqsp](https://huggingface.co/datasets/rmanluo/RoG-webqsp) and
   [rmanluo/RoG-cwq](https://huggingface.co/datasets/rmanluo/RoG-cwq).
+- **BioHopR** (Kim et al., 2025): biomedical questions that need one or two steps, from
+  [knowlab-research/BioHopR](https://huggingface.co/datasets/knowlab-research/BioHopR) on Hugging Face.
+- **PrimeKG** (Chandak et al., 2023): the biomedical knowledge graph that BioHopR's questions are about. Version 2.1
+  comes from [Harvard Dataverse](https://doi.org/10.7910/DVN/IXA7BM) under CC0. It is a 400 MB download, so BioHopR
+  needs it even when you use the sample questions.

@@ -22,6 +22,9 @@ INSTRUCTIONS = (
     "themselves the answer to the question."
 )
 MAX_OPTIONS = 255  # the decision models' limit per request; a step with more options is decided by a tournament
+# The state lists at most this many current entities. After a wrong turn on PrimeKG, a walk can stand on 25,000; the
+# other benchmarks' saved walks stood on at most 861.
+MAX_CURRENT = 1000
 
 
 def build_request(state: dict, options: list[dict]) -> dict:
@@ -82,7 +85,8 @@ async def walk(benchmark: str, question: dict, model, http, driver, max_steps: i
         if len(options) == 1:  # nothing to follow: STOP is the only option
             stopped_by = "nothing_to_follow"
             break
-        state = {"question": question["question"], "current_entities": current, "path_so_far": path, "hop": hop}
+        listed = current[:MAX_CURRENT] + [f"... (+{len(current) - MAX_CURRENT} more)"] * (len(current) > MAX_CURRENT)
+        state = {"question": question["question"], "current_entities": listed, "path_so_far": path, "hop": hop}
         offer_stop = not (BENCHMARKS[benchmark].no_stop_on_unnamed and all_unnamed(current))
         if not offer_stop and len(options) == 2:  # without STOP, one connection is left: follow it
             chosen, calls = 1, []
