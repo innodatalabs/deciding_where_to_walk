@@ -1,0 +1,9 @@
+{
+ "select_winner_by_corrected_rule": "claim",
+ "select_llm_gain": 0.014,
+ "confirmed_at_0.10": [],
+ "report_tested": [
+  "stoptext",
+  "stophere"
+ ]
+}

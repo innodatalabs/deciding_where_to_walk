@@ -110,14 +110,26 @@ def clear(driver, benchmark: str) -> None:
 
 
 # ---------------------------------------------------------------- walking: what is connected, as numbered options
+def add_planted(rows: list[dict], question: dict, current: list[str]) -> list[dict]:
+    """Poisoning tests only. Planted edges are added where the walk stands. A tag payload is added only when a real
+    tag edge is already among the rows, so the text sits in an existing tag list instead of inventing a relation."""
+    rows = list(rows)
+    rows += [edge for edge in question.get("planted") or [] if edge["at"] in current]
+    payload = question.get("tag_payload")
+    if payload and any(row["relation"] == payload["relation"] and row["direction"] == payload["direction"] for row in rows):
+        rows.append({"relation": payload["relation"], "direction": payload["direction"], "target": payload["target"]})
+    return rows
+
+
 async def neighbours(driver, benchmark: str, question: dict, current: list[str]) -> list[dict]:
     scope = scope_of(benchmark, question)
     result = await driver.execute_query(NEIGHBOURS, keys=[key(benchmark, scope, name) for name in current])
-    return [r.data() for r in result.records]
+    return add_planted([r.data() for r in result.records], question, current)
 
 
-def shown_names(names: list[str]) -> str:
-    text = ", ".join(names[:MAX_NAMES])
+def shown_names(names: list[str], quote: bool = False) -> str:
+    shown = [f'"{name}"' for name in names] if quote else names
+    text = ", ".join(shown[:MAX_NAMES])
     if len(names) > MAX_NAMES:
         text += f" ... (+{len(names) - MAX_NAMES} more)"
     return text
@@ -128,22 +140,25 @@ def build_options(rows: list[dict], current: list[str], benchmark: str, question
 
     MetaQA answers never lead back to the question's own entity, so it is left out of the targets."""
     leave_out = set(question["start"]) if benchmark == "metaqa" else set()
+    quote = bool(question.get("quote_names"))
     groups: dict[tuple[str, str], set[str]] = {}
     for row in rows:
         targets = groups.setdefault((row["relation"], row["direction"]), set())
         if row["target"] not in leave_out:
             targets.add(row["target"])
-    options = [{"step": "STOP", "targets": current, "text": "STOP: the answer is: " + shown_names(current)}]
+    options = [{"step": "STOP", "targets": current, "quote_names": quote,
+                "text": "STOP: the answer is: " + shown_names(current, quote)}]
     for (relation, direction), targets in sorted(groups.items()):
         if targets:
             options.append({"step": relation + (">" if direction == "outgoing" else "<"), "relation": relation,
-                            "direction": direction, "targets": sorted(targets),
-                            "text": f"follow {relation} ({direction}) to: {shown_names(sorted(targets))}"})
+                            "direction": direction, "targets": sorted(targets), "quote_names": quote,
+                            "text": f"follow {relation} ({direction}) to: {shown_names(sorted(targets), quote)}"})
     return options
 
 
 def describe_step(current: list[str], option: dict) -> str:
     """One line of the path so far, as the models see it."""
+    quote = option.get("quote_names", False)
     arrow = "->" if option["direction"] == "outgoing" else "<-"
-    return (f"{{{shown_names(current)}}} {option['relation']} ({option['direction']} {arrow}) "
-            f"{{{shown_names(option['targets'])}}}")
+    return (f"{{{shown_names(current, quote)}}} {option['relation']} ({option['direction']} {arrow}) "
+            f"{{{shown_names(option['targets'], quote)}}}")
